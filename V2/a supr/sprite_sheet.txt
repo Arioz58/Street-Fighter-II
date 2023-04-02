@@ -1,0 +1,12 @@
+import pygame as pg
+
+class SpriteSheet():
+    def __init__(self, image):
+        self.sprite_sheet = image
+    
+    def get_image(self, frame, longeur, hauteur): # methode qui vas parcourir notre image (longeur et hauteur correspond a ceux des personnages)
+        image = pg.Surface((longeur, hauteur)).convert_alpha() # on crée une surface dans le quelle on vas blit l'image
+        image.blit(self.sprite_sheet, (0,0), ((frame * longeur), 0, longeur, hauteur)) #on blit sur cette surface la premiere image du sprite sheet 
+        image = pg.transform.scale(image, (longeur * 5, hauteur * 5)) #on agrandi la taille 
+        image.set_colorkey((0,0,0))
+        return image

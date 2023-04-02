@@ -1,0 +1,36 @@
+import pygame as pg
+import sprite_sheet
+
+f = pg.display.set_mode((720,720))
+pg.display.set_caption('test')
+
+sprite_sheet_igm = pg.image.load('E:\street_fighter2\sprite_sheets\idle_ryu.png') #on charge le sprite sheet
+sprite = sprite_sheet.SpriteSheet(sprite_sheet_igm) # on crée une isntance grace a notre class SpritSheet pour pouvoir appeler la methode .get_image
+
+
+#liste d'animation
+animation_list = []
+animation_steps = 4
+
+for i in range(animation_steps):
+    animation_list.append(sprite.get_image(i, 43, 82)) #on ajoute dans la lsite d'animation les image a supperposer
+
+
+while True:
+
+    f.fill((50,50,50))
+
+    #on affiche les sprite
+    for x in range(animation_steps): #on parcours la liste d'animation
+        f.blit(animation_list[x], (0,0)) #on les affiche
+        pg.time.delay(125)
+        pg.display.flip()
+
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            pg.quit()
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                pg.quit()
+
+    pg.display.flip()
