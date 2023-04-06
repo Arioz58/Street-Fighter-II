@@ -32,10 +32,10 @@ class Player():
         self.isparry = False # si on parre une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
         self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": []}
-        for dire in os.listdir("V2/sprite_sheet"): #on charge toutes les images dont on a besoin
-            for dire_ in os.listdir(f"V2/sprite_sheet/{dire}"):
-                for file_name in os.listdir(f"V2/sprite_sheet/{dire}/{dire_}"):
-                    self.sprites[str(dire)].append(pg.image.load(f"V2/sprite_sheet/{dire}/{dire_}/{file_name}"))
+        for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
+            for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
+                for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
+                    self.sprites[str(dire)].append(pg.image.load(f"V3/sprite_sheet/{dire}/{dire_}/{file_name}"))
         self.hitbox = pg.Rect(self.x, self.y, 200, 350) #on recupere la taille de notre image et on l'appelle hitbox car pygame gere les hitbox/colisions avec les Rect
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.hitbox.y = self.y # permet de mettre les personnages aux bons endroits (car sinon (0,0))
