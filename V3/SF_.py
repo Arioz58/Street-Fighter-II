@@ -39,7 +39,7 @@ class Player():
         self.hitbox = pg.Rect(self.x, self.y, 200, 350) #on recupere la taille de notre image et on l'appelle hitbox car pygame gere les hitbox/colisions avec les Rect
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.hitbox.y = self.y # permet de mettre les personnages aux bons endroits (car sinon (0,0))
-        self.projectile_hb = pg.Rect(self.hitbox.right, self.hitbox.centery - 50/2, 50, 50)
+        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery)
 
     def punch(self, p2, win):
         """enleve des degats du joueur p1 au joueur p2
@@ -113,34 +113,32 @@ class Player():
         self.isKick = False # on reinitialise
 
 
-    def hadoken(self, p2, win):
+    def launch_hadoken(self, p2, win):
         """lance une boule de feu, fait avancer un Rect"""
-        if self.isPunch == False and self.isKick == False:# si on ne fait pas deja une autre action                
-                self.isHadoken = True
-                # hadoken_sound = pg.mixer.Sound("sound\projectile_ryu\hadoken_ryu.mp3")
-                # hadoken_sound.play()
-                if self.orientation == "right": #si on regare a gauche
-                    pg.draw.rect(win, (255,0,0), self.projectile_hb) # on affiche le projectile
-                    if not self.projectile_hb.colliderect(p2.hitbox): # tant que on a pas toucher l'adversaire
-                        if self.projectile_hb.x < 1080: # tant que le projectile ne sera pas assez loin
-                            self.projectile_hb.x += 10 # on fait avancer le projectile
-                        else: # si le projectile est assez loin
-                            self.isHadoken = False # on remets le booléen en False
-                            self.projectile_hb = pg.Rect(self.hitbox.right, self.hitbox.centery - 50/2, 50, 50) #on reinitialise les coordonnée du projectile
-                elif self.orientation == "left":
-                    pg.draw.rect(win, (0,0,255), self.projectile_hb) # on affiche le projectile
-                    if not self.projectile_hb.colliderect(p2.hitbox): # tant que on a pas toucher l'adversaire
-                        if self.projectile_hb.x > 0: # tant que le projectile ne sera pas assez loin
-                            self.projectile_hb.x -= 10 # on fait avancer le projectile
-                        else: # si le projectile est assez loin
-                            self.isHadoken = False # on remets le booléen en False
-                            self.projectile_hb = pg.Rect(self.hitbox.left, self.hitbox.centery - 50/2, 50, 50) #on reinitialise les coordonnée du projectile
-                if self.projectile_hb.colliderect(p2.hitbox):
-                    if p2.pv > 0: #si sa vie est > 0
-                        p2.pv -= self.force #alors on lui enleve de la vie
-                        p2.isTouched = True
-                        self.isHadoken = False # on remets le booléen en False
-                        self.projectile_hb = pg.Rect(self.hitbox.right, self.hitbox.centery - 50/2, 50, 50) #on reinitialise les coordonnée du projectile
+        if self.orientation == "right":
+            if not self.hadoken.projectile_hb.colliderect(p2.hitbox):
+                if self.isPunch == False or self.isKick == False:# si on ne fait pas deja une autre action
+                    if not self.hadoken.projectile_hb.colliderect(p2.hitbox) and self.hadoken.projectile_hb.x <= 1080:
+                        self.hadoken.launch_projectile(win)
+                    else:
+                        self.isHadoken = False
+                        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery)
+        if self.orientation == "left":
+            if not self.hadoken.projectile_hb.colliderect(p2.hitbox):
+                if self.isPunch == False or self.isKick == False:# si on ne fait pas deja une autre action
+                    if not self.hadoken.projectile_hb.colliderect(p2.hitbox) and self.hadoken.projectile_hb.x > 0:
+                        self.hadoken.orientation = "left"
+                        self.hadoken.launch_projectile(win)
+                    else:
+                        self.isHadoken = False
+                        self.hadoken = Projectile("left", self.hitbox.centerx, self.hitbox.centery)
+        if self.hadoken.projectile_hb.colliderect(p2.hitbox):
+            if p2.pv > 0: #si sa vie est > 0
+                p2.pv -= self.hadoken.damage #alors on lui enleve de la vie
+                p2.isTouched = True
+                self.isHadoken = False # on remets le booléen en False
+                self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery) #on reinitialise les coordonnée du projectile
+                        
 
     def move(self, appuyer):
         """bouge le joueur sur l'axe x,
@@ -286,3 +284,24 @@ class Player():
                 jump = pg.transform.scale(jump, (self.width, self.height))
                 jump = pg.transform.flip(jump, True, False)
                 win.blit(jump, self.hitbox)
+
+class Projectile():
+
+    def __init__(self, orientation, x, y):
+        self.x = x
+        self.y = y
+        self.orientation = orientation
+        self.projectile_hb = pg.Rect(self.x, self.y, 50, 50)
+        self.damage = 20
+
+    def launch_projectile(self, win):
+        if self.orientation == "right":
+            speed = 30
+        elif self.orientation == "left":
+            speed = -30
+        self.projectile_hb.x += speed
+        print(self.projectile_hb.x)
+        pg.draw.rect(win, (255,0,0), self.projectile_hb, 5)
+
+    def display_projectile(self, win, projectile_rect):
+        pass

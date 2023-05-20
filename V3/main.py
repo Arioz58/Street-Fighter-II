@@ -29,7 +29,8 @@ pg.mixer.init(44100, -16, 2, 2048)
 
 #initialisation des instance Player/joueurs
 player1 = Player(70,320,10,"right", 1)
-player2 = Player(810, 320, 10, "left", 2)
+# player2 = Player(810, 320, 10, "left", 2)
+player2 = Player(500, 320, 10, "left", 2)
 
             
 def play():
@@ -47,11 +48,11 @@ def play():
 
         # on affiche nos personnages
         player1.display(f, player1.hitbox, player2)
-        # player2.display(f, player2.hitbox, player1)
+        player2.display(f, player2.hitbox, player1)
         
         # on affiche
         player1.display_HUD(f)
-        # player2.display_HUD(f)
+        player2.display_HUD(f)
 
         # punch
         if player1.isPunch:
@@ -63,12 +64,12 @@ def play():
 
         # Hadoken/projectile
         if player1.isHadoken:
-            player1.hadoken(player2, f)
+            player1.launch_hadoken(player2, f)
 
         # saut
         if player1.isJump: # si saut
             player1.jump()
-            
+
         #accroupis
         if player1.isCrouch:
             player1.crouch(bouton_appuyer)
