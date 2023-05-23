@@ -52,7 +52,7 @@ def play():
         
         # on affiche
         player1.display_HUD(f)
-        player2.display_HUD(f)
+        # player2.display_HUD(f)
 
         # punch
         if player1.isPunch:
@@ -89,7 +89,6 @@ def play():
                     player1.isPunch = True
                 if event.key == K_s:
                     player1.isKick = True
-                
 
         bouton_appuyer = pg.key.get_pressed() #on recupere la touche appuyer
         if bouton_appuyer[K_ESCAPE]:
@@ -103,5 +102,5 @@ def play():
             player1.isHadoken = True
         # if bouton_appuyer[K_q]:
         #     player1.isPunch = True
-
+        print(player1.isHadoken)
 play()

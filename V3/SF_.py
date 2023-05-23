@@ -22,16 +22,18 @@ class Player():
         self.walkCount = 0 #permet d'animé
         self.jumpCount = 0 #permet d'animé
         self.punchCount = 0 #permet d'animé
+        self.hadokenCount = 0 #permet d'animé
         self.isMoving = False # si le joueur bouge
         self.isPunch = False #cout de poing booléen
         self.isKick = False # coute de pied booléen
         self.isCrouch = False # accroupis booléen
         self.isJump = False # saut booléen
+        self.isFalling = False # si on tombe apres un coup
         self.isHadoken = False # si on lance une boule de feu
         self.isTouched = False # si on est toucher
         self.isparry = False # si on parre une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
-        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": []}
+        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": []}
         for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
             for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
                 for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
@@ -39,7 +41,9 @@ class Player():
         self.hitbox = pg.Rect(self.x, self.y, 200, 350) #on recupere la taille de notre image et on l'appelle hitbox car pygame gere les hitbox/colisions avec les Rect
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.hitbox.y = self.y # permet de mettre les personnages aux bons endroits (car sinon (0,0))
+        self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)
         self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery)
+        self.somme_decalage = 0
 
     def punch(self, p2, win):
         """enleve des degats du joueur p1 au joueur p2
@@ -49,25 +53,41 @@ class Player():
         """
         if self.isKick == False: #si on ne fait pas deja un coup de pied
             if self.orientation == "right": # si on regarde a droite alors la hb du poing pointe a droite
-                self.isPunch = True
-                punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on definie la hitbox du coup
-                for _ in range(4):
-                    punch_hb.width += 30
-                    pg.draw.rect(win, (255,0,0), punch_hb, 5) #on dessine pour visualiser (a enlever une fois que le personnage sera afficher)
-                if punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
+                self.punch_hb.x, self.punch_hb.y = self.hitbox.centerx, self.hitbox.centery - 130
+                pg.draw.rect(win, (255,0,0), self.punch_hb, 5) #on dessine pour visualiser (a enlever une fois que le personnage sera afficher)
+                if self.punch_hb.width <= 150: # si le coup n'a pas atteint sa longeur max
+                    self.isPunch = True # on lance le coup
+                    self.punch_hb.width += 30 # on agrandi la hb du coup
+                if self.punch_hb.width > 150: # si le coup depasse le longeur max
+                    self.isPunch = False # on arrete le coup
+                    self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
+                if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
                     if p2.pv > 0: #si sa vie est > 0
                         p2.pv -= self.force #alors on lui enleve de la vie
                         p2.isTouched = True
+                        p2.hitbox.x += 20 # on fait reculer l'adversaire
+                        self.isPunch = False # on reinit
+                        self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
             if self.orientation == "left":# si on regarde a droite alors la hb du poing pointe a gauche
                 self.isPunch = True
-                punch_hb = pg.Rect(self.hitbox.centerx - 200, self.hitbox.centery - 100, 150,60)
-                pg.draw.rect(win, (0,0,255), punch_hb,5)
-                if punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
+                self.punch_hb.x, self.punch_hb.y = self.hitbox.centerx - self.somme_decalage - 20, self.hitbox.centery - 100
+                pg.draw.rect(win, (0,0,255), self.punch_hb,5)
+                if self.punch_hb.width <= 150:
+                    self.isPunch = True
+                    self.punch_hb.width += 30
+                    self.somme_decalage += 30
+                    if self.somme_decalage == 150:
+                        self.somme_decalage = 0
+                if self.punch_hb.width > 150:
+                    self.isPunch = False
+                    self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
+                if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
                     if p2.pv > 0: #si sa vie est > 0
                         p2.pv -= self.force #alors on lui enleve de la vie
                         p2.isTouched = True
-        
-            self.isPunch = False #on remets le booléen a False
+                        p2.hitbox.x -= 20 # on fait reculer l'adversaire
+                        self.isPunch = False # on reinit
+                        self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
 
     def kick(self, p2, win):
         """enleve des degats du joueur p1 au joueur p2
@@ -76,7 +96,7 @@ class Player():
         win : las surface sur le quelle on affiche le rectangle
         """
         if not self.isPunch and not self.isMoving: # si on ne fait pas deja un coup de poing
-            if self.isCrouch:
+            if self.isCrouch: # si on est accroupie
                 if self.orientation == "right":
                     self.isKick = True
                     kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery , 200, 100) #la hb du coup de pied
@@ -85,6 +105,7 @@ class Player():
                         if p2.pv > 0: # et que les PV du joueur toucher n'est pas nul
                             p2.pv -= self.force # on enleve des pv
                             p2.isTouched = True
+                            p2.hitbox.x += 20
                 if self.orientation == "left":# si on regarde a droite alors la hb du poing pointe a gauche
                     self.isKick = True
                     kick_hb = pg.Rect(self.hitbox.centerx - 200, self.hitbox.centery , 200, 100) #la hb du coup de pied
@@ -93,6 +114,7 @@ class Player():
                         if p2.pv > 0: #si sa vie est > 0
                             p2.pv -= self.force #alors on lui enleve de la vie
                             p2.isTouched = True
+                            p2.hitbox.x -= 20
             else:
                 if self.orientation == "right":
                     self.isKick = True
@@ -102,6 +124,7 @@ class Player():
                         if p2.pv > 0:
                             p2.pv -= self.force
                             p2.isTouched = True
+                            p2.hitbox.x += 100
                 elif self.orientation == "left":
                     self.isKick = True
                     kick_hb = pg.Rect(self.hitbox.left - 100, self.hitbox.y, 100, 150)
@@ -110,6 +133,7 @@ class Player():
                         if p2.pv > 0:
                             p2.pv -= self.force
                             p2.isTouched = True
+                            p2.hitbox.x -= 100
         self.isKick = False # on reinitialise
 
 
@@ -245,6 +269,21 @@ class Player():
                 punch = pg.transform.flip(punch, True, False)
                 win.blit(punch, self.hitbox.topleft)
 
+        # animation Hadoken
+        elif self.isHadoken:
+            #on affiche idle en fonction de l'orientation
+            self.hadokenCount += 0.40
+            if self.hadokenCount > len(self.sprites["launch"]):
+                self.hadokenCount = 0
+            launch = self.sprites["launch"][int(self.hadokenCount)]
+            if self.orientation == "right": #si l'orientation est droite on affiche l'image qui regarde a droite
+                launch = pg.transform.scale(launch, (launch.get_width() * 5,launch.get_height() * 4.7))
+                win.blit(launch, self.hitbox)
+            elif self.orientation == "left": #si l'orientation est gauche on affiche l'image qui regarde a gauche
+                launch = pg.transform.scale(launch, (self.width,self.height))
+                launch = pg.transform.flip(launch, True, False)
+                win.blit(launch, self.hitbox.top)
+        
         # si on ne bouge pas on affiche le perso Idle dans la HB
         elif self.isMoving == False and self.isJump == False:
             #on affiche idle en fonction de l'orientation
@@ -293,6 +332,7 @@ class Projectile():
         self.orientation = orientation
         self.projectile_hb = pg.Rect(self.x, self.y, 50, 50)
         self.damage = 20
+        self.sprite = []
 
     def launch_projectile(self, win):
         if self.orientation == "right":
@@ -300,7 +340,6 @@ class Projectile():
         elif self.orientation == "left":
             speed = -30
         self.projectile_hb.x += speed
-        print(self.projectile_hb.x)
         pg.draw.rect(win, (255,0,0), self.projectile_hb, 5)
 
     def display_projectile(self, win, projectile_rect):
