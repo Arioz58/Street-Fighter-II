@@ -33,7 +33,7 @@ class Player():
         self.isTouched = False # si on est toucher
         self.isparry = False # si on parre une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
-        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": []}
+        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "shadow": []}
         for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
             for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
                 for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
@@ -42,7 +42,7 @@ class Player():
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.hitbox.y = self.y # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)
-        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery)
+        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110)
         self.somme_decalage = 0
 
     def punch(self, p2, win):
@@ -146,7 +146,7 @@ class Player():
                         self.hadoken.launch_projectile(win)
                     else:
                         self.isHadoken = False
-                        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery)
+                        self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110)
         if self.orientation == "left":
             if not self.hadoken.projectile_hb.colliderect(p2.hitbox):
                 if self.isPunch == False or self.isKick == False:# si on ne fait pas deja une autre action
@@ -155,13 +155,13 @@ class Player():
                         self.hadoken.launch_projectile(win)
                     else:
                         self.isHadoken = False
-                        self.hadoken = Projectile("left", self.hitbox.centerx, self.hitbox.centery)
+                        self.hadoken = Projectile("left", self.hitbox.centerx, self.hitbox.centery - 110)
         if self.hadoken.projectile_hb.colliderect(p2.hitbox):
             if p2.pv > 0: #si sa vie est > 0
                 p2.pv -= self.hadoken.damage #alors on lui enleve de la vie
                 p2.isTouched = True
                 self.isHadoken = False # on remets le booléen en False
-                self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery) #on reinitialise les coordonnée du projectile
+                self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110) #on reinitialise les coordonnée du projectile
                         
 
     def move(self, appuyer):
@@ -244,6 +244,13 @@ class Player():
         elif self.hitbox.centerx < p2.hitbox.centerx: # si devant l'adversaire
             self.orientation = "right"
         
+        #on affiche l'ombre du joueur
+        x = self.hitbox.bottomleft[0] # destination x du rect dans le quelle on affiche l'ombre du joueur
+        y = 720 - 50 # y reste toujours la meme
+        shadow_rect = pg.Rect(x, y - 50, 200, 50)
+        shadow = pg.transform.scale(self.sprites["shadow"][0], (shadow_rect.width, shadow_rect.height)) # on redimensionne l'ombre
+        win.blit(shadow, shadow_rect.topleft) # on affiche
+        
         # si on est toucher alors on affiche le perso toucher
         if self.isTouched:
             if self.orientation == "right":
@@ -257,7 +264,7 @@ class Player():
 
         #l'affichage du coup
         elif self.isPunch and self.isMoving == False:# si on mets un coup et ne bouge pas
-            self.punchCount += 0.30 # on incremente (rapidité de l'animation)
+            self.punchCount += 0.50 # on incremente (rapidité de l'animation)
             if int(self.punchCount) == len(self.sprites["punch"]): # si l'entier est egale a la longeur max de l'animation
                 self.punchCount = 0 #on reinit
             punch = self.sprites["punch"][int(self.punchCount)] # notre image est l'indice punchCount
