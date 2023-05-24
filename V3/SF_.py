@@ -23,6 +23,7 @@ class Player():
         self.jumpCount = 0 #permet d'animé
         self.punchCount = 0 #permet d'animé
         self.hadokenCount = 0 #permet d'animé
+        self.crouchCount = 0
         self.isMoving = False # si le joueur bouge
         self.isPunch = False #cout de poing booléen
         self.isKick = False # coute de pied booléen
@@ -33,7 +34,7 @@ class Player():
         self.isTouched = False # si on est toucher
         self.isparry = False # si on parre une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
-        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "shadow": []}
+        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "shadow": [], "crouch": [], "crouch_kick": [], "crouch_punch": []}
         for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
             for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
                 for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
@@ -207,12 +208,11 @@ class Player():
         on reduit la hitbox du personnage et le personnage s'accroupis
         """
         if get_pressed[K_DOWN]:
-            self.hitbox.height = 350/2 #on reduit la HB
-            if self.hitbox.bottom < 520:
-                self.hitbox.y += 350/2 # on descend le joueuer de la moitié de la hitobx
+            self.hitbox.height = 280 #on reduit la HB
+            if self.hitbox.bottom < 670: # permet de savoir si notre personnage est en contact avec le sol
+                self.hitbox.y += 70 # on descend le joueuer de la moitié de la hitobx
         else:
             self.hitbox.height = 350 #on revient a l'etat initiale
-            self.hitbox.width = 200
             self.hitbox.y = 320
             self.isCrouch = False
         
@@ -269,12 +269,15 @@ class Player():
                 self.punchCount = 0 #on reinit
             punch = self.sprites["punch"][int(self.punchCount)] # notre image est l'indice punchCount
             if self.orientation == "right": #si on regarde a droite
-                punch = pg.transform.scale(punch, (240, self.height))
+                punch = pg.transform.scale(punch, (punch.get_width() * 5.2, punch.get_height() * 4.5))
                 win.blit(punch, self.hitbox.topleft)
             elif self.orientation == "left": #si on regarde a gauche 
-                punch = pg.transform.scale(punch, (400, self.height))
+                punch = pg.transform.scale(punch, (punch.get_width() * 5.2, punch.get_height() * 4.5))
                 punch = pg.transform.flip(punch, True, False)
-                win.blit(punch, self.hitbox.topleft)
+                if int(self.punchCount) == 1:
+                    win.blit(punch, (self.hitbox.x - 80, self.hitbox.y))
+                else:
+                    win.blit(punch, (self.hitbox.x, self.hitbox.y))
 
         # animation Hadoken
         elif self.isHadoken:
@@ -284,13 +287,35 @@ class Player():
                 self.hadokenCount = 0
             launch = self.sprites["launch"][int(self.hadokenCount)]
             if self.orientation == "right": #si l'orientation est droite on affiche l'image qui regarde a droite
-                launch = pg.transform.scale(launch, (launch.get_width() * 5,launch.get_height() * 4.7))
+                launch = pg.transform.scale(launch, (launch.get_width() * 5,launch.get_height() * 4.8))
                 win.blit(launch, self.hitbox)
             elif self.orientation == "left": #si l'orientation est gauche on affiche l'image qui regarde a gauche
-                launch = pg.transform.scale(launch, (self.width,self.height))
+                launch = pg.transform.scale(launch, (launch.get_width() * 5 ,launch.get_height() * 4.8))
                 launch = pg.transform.flip(launch, True, False)
-                win.blit(launch, self.hitbox.top)
+                win.blit(launch, (self.hitbox.x - 100, self.hitbox.y))
         
+        # animation quand on est accroupie
+        elif self.isCrouch:
+            self.crouchCount += 0.40
+            if self.crouchCount >= len(self.sprites["crouch"]):
+                self.crouchCount = 1
+            crouch = self.sprites["crouch"][int(self.crouchCount)]
+            if self.orientation == "right":
+                crouch = pg.transform.scale(crouch, (crouch.get_width() * 5, crouch.get_height()* 5))
+                win.blit(crouch, self.hitbox)
+            elif self.orientation == "left":
+                crouch = pg.transform.scale(crouch, (crouch.get_width() * 5, crouch.get_height() * 5))
+                crouch = pg.transform.flip(crouch, True, False)
+                win.blit(crouch, self.hitbox)
+
+        # animation accroupie et coup de pied
+        elif self.isCrouch and self.isKick:
+            pass
+        
+        # animation accroupie et coup de poing
+        elif self.isCrouch and self.isPunch:
+            pass
+
         # si on ne bouge pas on affiche le perso Idle dans la HB
         elif self.isMoving == False and self.isJump == False:
             #on affiche idle en fonction de l'orientation
