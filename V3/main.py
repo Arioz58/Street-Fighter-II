@@ -102,4 +102,6 @@ def play():
             player1.isHadoken = True
         # if bouton_appuyer[K_q]:
         #     player1.isPunch = True
+        # player2.isParry = True
+        player2.isParry = True
 play()

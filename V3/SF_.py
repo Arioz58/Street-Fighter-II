@@ -23,7 +23,9 @@ class Player():
         self.jumpCount = 0 #permet d'animé
         self.punchCount = 0 #permet d'animé
         self.hadokenCount = 0 #permet d'animé
+        self.crouchKickCount = 0 #permet d'animé
         self.crouchCount = 0
+        self.crouchPunchCount = 0
         self.isMoving = False # si le joueur bouge
         self.isPunch = False #cout de poing booléen
         self.isKick = False # coute de pied booléen
@@ -32,17 +34,22 @@ class Player():
         self.isFalling = False # si on tombe apres un coup
         self.isHadoken = False # si on lance une boule de feu
         self.isTouched = False # si on est toucher
-        self.isparry = False # si on parre une attack
+        self.isParry = False # si on est ENTRAIN de parrer une attack
+        self.pared = False # si on PARRE une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
-        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "shadow": [], "crouch": [], "crouch_kick": [], "crouch_punch": []}
+        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "block":[], "shadow": [],
+                         "crouch": [], "crouch_kick": [], "crouch_punch": [], "crouch_block": []}
+
         for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
             for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
                 for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
                     self.sprites[str(dire)].append(pg.image.load(f"V3/sprite_sheet/{dire}/{dire_}/{file_name}"))
+                    
         self.hitbox = pg.Rect(self.x, self.y, 200, 350) #on recupere la taille de notre image et on l'appelle hitbox car pygame gere les hitbox/colisions avec les Rect
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.hitbox.y = self.y # permet de mettre les personnages aux bons endroits (car sinon (0,0))
         self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)
+        self.kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery + 20, 50, 100)
         self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110)
         self.somme_decalage = 0
 
@@ -63,12 +70,32 @@ class Player():
                     self.isPunch = False # on arrete le coup
                     self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
                 if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
-                    if p2.pv > 0: #si sa vie est > 0
-                        p2.pv -= self.force #alors on lui enleve de la vie
-                        p2.isTouched = True
-                        p2.hitbox.x += 20 # on fait reculer l'adversaire
-                        self.isPunch = False # on reinit
+                    get_hit_sound = pg.mixer.Sound("V3/sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
+                    super_punch = pg.mixer.Sound("V3/sound/super_punch/grr_bah.mp3")
+                    parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
+                    if p2.isParry:
+                        parry_sound.play() # on joue le son
+                        pg.draw.rect(win, (255,255,255), (0,0,1080,720), 50)
+                        p2.pared = True
                         self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
+                        self.isPunch = False # on reinit
+                    elif p2.pv > 0: #si sa vie est > 0
+                        if self.punch_hb.width == 150:
+                            p2.pv -= self.force + 15 #alors on lui enleve de la vie
+                            p2.isTouched = True
+                            get_hit_sound.play() # on joue le son
+                            super_punch.play()
+                            p2.hitbox.x += 20 # on fait reculer l'adversaire
+                            self.isPunch = False # on reinit
+                            self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
+                        else:    
+                            p2.pv -= self.force #alors on lui enleve de la vie
+                            p2.isTouched = True
+                            get_hit_sound.play() # on joue le son
+                            p2.hitbox.x += 20 # on fait reculer l'adversaire
+                            self.isPunch = False # on reinit
+                            self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
+                    
             if self.orientation == "left":# si on regarde a droite alors la hb du poing pointe a gauche
                 self.isPunch = True
                 self.punch_hb.x, self.punch_hb.y = self.hitbox.centerx - self.somme_decalage - 20, self.hitbox.centery - 100
@@ -83,12 +110,31 @@ class Player():
                     self.isPunch = False
                     self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
                 if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
-                    if p2.pv > 0: #si sa vie est > 0
-                        p2.pv -= self.force #alors on lui enleve de la vie
-                        p2.isTouched = True
-                        p2.hitbox.x -= 20 # on fait reculer l'adversaire
-                        self.isPunch = False # on reinit
+                    get_hit_sound = pg.mixer.Sound("V3/sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
+                    super_punch = pg.mixer.Sound("V3/sound/super_punch/grr_bah.mp3")
+                    parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
+                    if p2.isParry:
+                        parry_sound.play() # on joue le son
+                        pg.draw.rect(win, (255,255,255), (0,0,1080,720), 50)
+                        p2.pared = True
                         self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
+                        self.isPunch = False # on reinit
+                    elif p2.pv > 0: #si sa vie est > 0
+                        if self.punch_hb.width == 150:
+                            p2.pv -= self.force + 15 #alors on lui enleve de la vie
+                            p2.isTouched = True
+                            get_hit_sound.play() # on joue le son
+                            super_punch.play()
+                            p2.hitbox.x -= 20 # on fait reculer l'adversaire
+                            self.isPunch = False # on reinit
+                            self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
+                        else:
+                            p2.pv -= self.force #alors on lui enleve de la vie
+                            p2.isTouched = True
+                            get_hit_sound.play() # on joue le son
+                            p2.hitbox.x -= 20 # on fait reculer l'adversaire
+                            self.isPunch = False # on reinit
+                            self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60)# on reinit
 
     def kick(self, p2, win):
         """enleve des degats du joueur p1 au joueur p2
@@ -97,16 +143,30 @@ class Player():
         win : las surface sur le quelle on affiche le rectangle
         """
         if not self.isPunch and not self.isMoving: # si on ne fait pas deja un coup de poing
+            kick_sound = pg.mixer.Sound("V3/sound/kick_ryu/kick.mp3")
+            parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
             if self.isCrouch: # si on est accroupie
                 if self.orientation == "right":
+                    self.kick_hb.x, self.kick_hb.y = self.hitbox.centerx, self.hitbox.centery + 20
                     self.isKick = True
-                    kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery , 200, 100) #la hb du coup de pied
-                    pg.draw.rect(win, (255,0,0), kick_hb,5) # on affiche cette HB
-                    if kick_hb.colliderect(p2.hitbox): # si il y a collision
-                        if p2.pv > 0: # et que les PV du joueur toucher n'est pas nul
+                    pg.draw.rect(win, (255,0,0), self.kick_hb,5) # on affiche cette HB
+                    if self.kick_hb.width < 200:
+                        self.kick_hb.width += 20
+                    elif self.kick_hb.width > 200:
+                        self.kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery + 20, 50, 100)
+                    if self.kick_hb.colliderect(p2.hitbox): # si il y a collision
+                        if p2.isParry:
+                            parry_sound.play() # on joue le son
+                            pg.draw.rect(win, (255,255,255), (0,0,1080,720), 50)
+                            p2.pared = True
+                            self.kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery + 20, 50, 100)
+                            self.isKick = False # on reinit
+                        elif p2.pv > 0: # et que les PV du joueur toucher n'est pas nul
+                            kick_sound.play()
                             p2.pv -= self.force # on enleve des pv
                             p2.isTouched = True
-                            p2.hitbox.x += 20
+                            p2.hitbox.x += 100
+                            self.kick_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery + 20, 50, 100)
                 if self.orientation == "left":# si on regarde a droite alors la hb du poing pointe a gauche
                     self.isKick = True
                     kick_hb = pg.Rect(self.hitbox.centerx - 200, self.hitbox.centery , 200, 100) #la hb du coup de pied
@@ -115,7 +175,7 @@ class Player():
                         if p2.pv > 0: #si sa vie est > 0
                             p2.pv -= self.force #alors on lui enleve de la vie
                             p2.isTouched = True
-                            p2.hitbox.x -= 20
+                            p2.hitbox.x -= 100
             else:
                 if self.orientation == "right":
                     self.isKick = True
@@ -135,7 +195,7 @@ class Player():
                             p2.pv -= self.force
                             p2.isTouched = True
                             p2.hitbox.x -= 100
-        self.isKick = False # on reinitialise
+        # self.isKick = False # on reinitialise
 
 
     def launch_hadoken(self, p2, win):
@@ -184,6 +244,7 @@ class Player():
                     self.walkCount = 0
         elif appuyer[K_LEFT]:
             if self.hitbox.left > 0:
+                self.isParry = True # si on recule on peut parré une attack
                 self.hitbox.x -= x_vel
                 self.isMoving = True
                 self.walkCount -= 0.40
@@ -191,6 +252,7 @@ class Player():
                     self.walkCount = 0
         else:
             self.isMoving = False
+            self.isParry = False
         
     def jump(self):
         """methode permettant au personnage de sauter"""
@@ -238,7 +300,7 @@ class Player():
         p2 : instance Player adverse (permet de changer la direction)
         """
         # si le Joueur est derriere l'adversaire leurs orientation s'inverse
-        pg.draw.rect(win, (255,255,255),player_rect) # on affiche la HB des joueurs
+        # pg.draw.rect(win, (255,255,255),player_rect) # on affiche la HB des joueurs
         if self.hitbox.centerx > p2.hitbox.centerx: #si derriere l'adversaire
             self.orientation = "left"
         elif self.hitbox.centerx < p2.hitbox.centerx: # si devant l'adversaire
@@ -261,6 +323,18 @@ class Player():
                 touched = pg.transform.flip(touched, True, False)# on tourne l'image a gauche
                 win.blit(touched, self.hitbox) # on affiche l'image
             self.isTouched = False # on reinitialise isTouched
+
+        # animation accroupie et coup de poing
+        elif self.isCrouch and self.isPunch:
+            self.crouchPunchCount += 0.50
+            if self.crouchPunchCount >= len(self.sprites["crouch_punch"]):
+                self.crouchPunchCount = 0
+            cPunch = self.sprites["crouch_punch"][int(self.crouchPunchCount)]
+            if self.orientation == "right":
+                cPunch = pg.transform.scale(cPunch, (cPunch.get_width() * 5, cPunch.get_height() * 5))
+                win.blit(cPunch, self.hitbox)
+            elif self.orientation == "left":
+                pass
 
         #l'affichage du coup
         elif self.isPunch and self.isMoving == False:# si on mets un coup et ne bouge pas
@@ -293,7 +367,25 @@ class Player():
                 launch = pg.transform.scale(launch, (launch.get_width() * 5 ,launch.get_height() * 4.8))
                 launch = pg.transform.flip(launch, True, False)
                 win.blit(launch, (self.hitbox.x - 100, self.hitbox.y))
-        
+
+        # animation accroupie et coup de pied
+        elif self.isCrouch and self.isKick:
+            self.crouchKickCount += 0.35
+            if self.crouchKickCount >= len(self.sprites["crouch_kick"]):
+                self.crouchKickCount = 0
+                self.isKick = False
+            crouch_kick = self.sprites["crouch_kick"][int(self.crouchKickCount)]
+            if self.orientation == "right":
+                crouch_kick = pg.transform.scale(crouch_kick, (crouch_kick.get_width() * 5, crouch_kick.get_height() * 5))
+                win.blit(crouch_kick, self.hitbox)
+            elif self.orientation == "left":
+                crouch_kick = pg.transform.scale(crouch_kick, (crouch_kick.get_width() * 5, crouch_kick.get_height() * 5))
+                crouch_kick = pg.transform.flip(crouch_kick, True, False)
+                if int(self.crouchKickCount) == 1:
+                    win.blit(crouch_kick, (self.hitbox.x - 100, self.hitbox.y))
+                else:
+                    win.blit(crouch_kick, self.hitbox)
+
         # animation quand on est accroupie
         elif self.isCrouch:
             self.crouchCount += 0.40
@@ -307,15 +399,19 @@ class Player():
                 crouch = pg.transform.scale(crouch, (crouch.get_width() * 5, crouch.get_height() * 5))
                 crouch = pg.transform.flip(crouch, True, False)
                 win.blit(crouch, self.hitbox)
-
-        # animation accroupie et coup de pied
-        elif self.isCrouch and self.isKick:
-            pass
         
-        # animation accroupie et coup de poing
-        elif self.isCrouch and self.isPunch:
-            pass
-
+        # si on arrive a parrer un coup
+        elif self.pared:
+            pare = self.sprites["block"][0]
+            if self.orientation == "right":
+                pare = pg.transform.scale(pare, (pare.get_width() * 5, pare.get_height() * 4.5))
+                win.blit(pare, self.hitbox)
+            elif self.orientation == "left":
+                pare = pg.transform.scale(pare, (pare.get_width() * 5, pare.get_height() * 4.3))
+                pare = pg.transform.flip(pare, True, False)
+                win.blit(pare, self.hitbox)
+            self.pared = False
+        
         # si on ne bouge pas on affiche le perso Idle dans la HB
         elif self.isMoving == False and self.isJump == False:
             #on affiche idle en fonction de l'orientation
