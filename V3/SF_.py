@@ -23,6 +23,7 @@ class Player():
         self.jumpCount = 0 #permet d'animé
         self.punchCount = 0 #permet d'animé
         self.hadokenCount = 0 #permet d'animé
+        self.kickCount = 0
         self.crouchKickCount = 0 #permet d'animé
         self.crouchCount = 0
         self.crouchPunchCount = 0
@@ -37,8 +38,20 @@ class Player():
         self.isParry = False # si on est ENTRAIN de parrer une attack
         self.pared = False # si on PARRE une attack
         self.jump_height = 10 # hauteur max du saut de notre personnage
-        self.sprites = {"idle": [], "punch": [], "hit": [], "jump": [], "walk": [], "kick": [], "launch": [], "block":[], "shadow": [],
-                         "crouch": [], "crouch_kick": [], "crouch_punch": [], "crouch_block": []}
+        self.sprites = {"idle": [], 
+                        "punch": [], 
+                        "hit": [], 
+                        "jump": [], 
+                        "walk": [], 
+                        "kick": [], 
+                        "launch": [], 
+                        "block":[], 
+                        "shadow": [],
+                        "crouch": [], 
+                        "crouch_kick": [], 
+                        "crouch_punch": [], 
+                        "crouch_block": []
+                        }
 
         for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
             for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
@@ -367,7 +380,7 @@ class Player():
                 launch = pg.transform.scale(launch, (launch.get_width() * 5 ,launch.get_height() * 4.8))
                 launch = pg.transform.flip(launch, True, False)
                 win.blit(launch, (self.hitbox.x - 100, self.hitbox.y))
-
+        
         # animation accroupie et coup de pied
         elif self.isCrouch and self.isKick:
             self.crouchKickCount += 0.35
@@ -385,6 +398,17 @@ class Player():
                     win.blit(crouch_kick, (self.hitbox.x - 100, self.hitbox.y))
                 else:
                     win.blit(crouch_kick, self.hitbox)
+        
+        # animation du coup de pied
+        elif self.isKick:
+            self.kickCount += 0.35
+            if self.kickCount >= len(self.sprites["kick"]):
+                self.kickCount = 0
+                self.isKick = False
+            kick = self.sprites["kick"][int(self.kickCount)]
+            if self.orientation == "right":
+                kick = pg.transform.scale(kick, (kick.get_width() * 5, kick.get_height() * 5))
+                win.blit(kick, self.hitbox)
 
         # animation quand on est accroupie
         elif self.isCrouch:
