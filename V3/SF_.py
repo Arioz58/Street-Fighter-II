@@ -2,6 +2,8 @@ import pygame as pg
 from pygame.locals import *
 import os
 
+from Projectile import *
+
 pg.mixer.init()
 class Player():
     """on créer une classe player avec tous les attribut d'un joueur
@@ -218,6 +220,7 @@ class Player():
                 if self.isPunch == False or self.isKick == False:# si on ne fait pas deja une autre action
                     if not self.hadoken.projectile_hb.colliderect(p2.hitbox) and self.hadoken.projectile_hb.x <= 1080:
                         self.hadoken.launch_projectile(win)
+                        self.hadoken.display_projectile(win, self.hadoken.projectile_hb)
                     else:
                         self.isHadoken = False
                         self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110)
@@ -236,7 +239,6 @@ class Player():
                 p2.isTouched = True
                 self.isHadoken = False # on remets le booléen en False
                 self.hadoken = Projectile("right", self.hitbox.centerx, self.hitbox.centery - 110) #on reinitialise les coordonnée du projectile
-                        
 
     def move(self, appuyer):
         """bouge le joueur sur l'axe x,
@@ -475,24 +477,3 @@ class Player():
                 jump = pg.transform.scale(jump, (self.width, self.height))
                 jump = pg.transform.flip(jump, True, False)
                 win.blit(jump, self.hitbox)
-
-class Projectile():
-
-    def __init__(self, orientation, x, y):
-        self.x = x
-        self.y = y
-        self.orientation = orientation
-        self.projectile_hb = pg.Rect(self.x, self.y, 50, 50)
-        self.damage = 20
-        self.sprite = []
-
-    def launch_projectile(self, win):
-        if self.orientation == "right":
-            speed = 30
-        elif self.orientation == "left":
-            speed = -30
-        self.projectile_hb.x += speed
-        pg.draw.rect(win, (255,0,0), self.projectile_hb, 5)
-
-    def display_projectile(self, win, projectile_rect):
-        pass

@@ -1,7 +1,9 @@
 import pygame as pg
 from pygame.locals import *
-from SF_ import *
+
 from PARAMETRE import * #PARAMETRE est le fichier contenant toutes les constantes
+from SF_ import *
+
 
 pg.init()
 pg.mixer.init()
@@ -29,9 +31,7 @@ pg.mixer.init(44100, -16, 2, 2048)
 
 #initialisation des instance Player/joueurs
 player1 = Player(70,320,10,"right", 1)
-# player2 = Player(810, 320, 10, "left", 2)
-player2 = Player(500, 320, 10, "left", 2)
-
+player2 = Player(810, 320, 10, "left", 2)
             
 def play():
     msecond = 0
@@ -100,7 +100,10 @@ def play():
             player1.isJump = True
         if bouton_appuyer[K_d]:
             player1.isHadoken = True
-        # if bouton_appuyer[K_q]:
-        #     player1.isPunch = True
+        if bouton_appuyer[K_r]:
+            player2.isParry = True
+        else:
+            player2.isParry = False
         # player2.isParry = True
+        # print(bouton_appuyer)
 play()
