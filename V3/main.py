@@ -29,17 +29,54 @@ timer = pg.time.Clock()
 #init mixer
 pg.mixer.init(44100, -16, 2, 2048)
 
+
+
+#menu song
+menu_song = pg.mixer.Sound("V3/intro.mp3")
+
+def menu():
+    menu_song.play()
+    while True:
+        
+        pg.display.flip()
+        SF_logo = pg.image.load("V3/menu/SF_logo.png")
+        SF_logo = pg.transform.scale(SF_logo,(1080,720))
+        f.blit(SF_logo,(-20,0))
+        
+        #gestion des evenements
+        for event in pg.event.get():
+            if event.type == QUIT: #pour la croix de la fenetre
+                pg.quit()
+        
+
+        bouton_appuyer = pg.key.get_pressed() #on recupere la touche appuyer
+        if bouton_appuyer[K_ESCAPE]:
+            pg.quit()
+        if bouton_appuyer[K_RETURN]:
+            menu_song.stop()
+            stage_song.play(-1)
+            play()
+
+#niveau
+stage = pg.image.load("V3/stage/ryu_stage.png")
+stage = pg.transform.scale(stage, (1910,743))
+
+#stage song
+stage_song = pg.mixer.Sound("V3/stage/ryu_stage_song/song.mp3")
+
 #initialisation des instance Player/joueurs
 player1 = Player(70,320,10,"right", 1)
-player2 = Player(810, 320, 10, "left", 2)
-            
+player2 = Player(810, 320, 10, "left", 2)            
+
 def play():
     msecond = 0
     
     while True:
         pg.display.flip()
 
-        f.fill(noir)
+        # on affiche notre image de fond
+        f.blit(stage, (-410,-19))
+        
         timer.tick(FPS)
         # print(timer)
 
@@ -106,4 +143,4 @@ def play():
             player2.isParry = False
         # player2.isParry = True
         # print(bouton_appuyer)
-play()
+menu()
