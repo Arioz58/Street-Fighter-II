@@ -54,7 +54,7 @@ pg.mixer.init(44100, -16, 2, 2048)
 
 
 #niveau
-stage = pg.image.load("V2/stage/ryu_stage.png")
+stage = pg.image.load("./stage/ryu_stage.png")
 stage = pg.transform.scale(stage, (1910,743))
 
 #stage song
