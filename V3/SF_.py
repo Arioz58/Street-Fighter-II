@@ -55,10 +55,10 @@ class Player():
                         "crouch_block": []
                         }
 
-        for dire in os.listdir("V3/sprite_sheet"): #on charge toutes les images dont on a besoin
-            for dire_ in os.listdir(f"V3/sprite_sheet/{dire}"):
-                for file_name in os.listdir(f"V3/sprite_sheet/{dire}/{dire_}"):
-                    self.sprites[str(dire)].append(pg.image.load(f"V3/sprite_sheet/{dire}/{dire_}/{file_name}"))
+        for dire in os.listdir("./sprite_sheet"): #on charge toutes les images dont on a besoin
+            for dire_ in os.listdir(f"./sprite_sheet/{dire}"):
+                for file_name in os.listdir(f"./sprite_sheet/{dire}/{dire_}"):
+                    self.sprites[str(dire)].append(pg.image.load(f"./sprite_sheet/{dire}/{dire_}/{file_name}"))
                     
         self.hitbox = pg.Rect(self.x, self.y, 200, 350) #on recupere la taille de notre image et on l'appelle hitbox car pygame gere les hitbox/colisions avec les Rect
         self.hitbox.x = self.x # permet de mettre les personnages aux bons endroits (car sinon (0,0))
@@ -85,9 +85,9 @@ class Player():
                     self.isPunch = False # on arrete le coup
                     self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
                 if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
-                    get_hit_sound = pg.mixer.Sound("V3/sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
-                    super_punch = pg.mixer.Sound("V3/sound/super_punch/grr_bah.mp3")
-                    parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
+                    get_hit_sound = pg.mixer.Sound("./sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
+                    super_punch = pg.mixer.Sound("./sound/super_punch/grr_bah.mp3")
+                    parry_sound = pg.mixer.Sound("./sound/block_ryu/block.mp3")
                     if p2.isParry:
                         parry_sound.play() # on joue le son
                         pg.draw.rect(win, (255,255,255), (0,0,1080,720), 50)
@@ -125,9 +125,9 @@ class Player():
                     self.isPunch = False
                     self.punch_hb = pg.Rect(self.hitbox.centerx, self.hitbox.centery - 130, 30,60) # on reinit la hb du coup
                 if self.punch_hb.colliderect(p2.hitbox): #si la hb du coup touche la hb du joueur adverse
-                    get_hit_sound = pg.mixer.Sound("V3/sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
-                    super_punch = pg.mixer.Sound("V3/sound/super_punch/grr_bah.mp3")
-                    parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
+                    get_hit_sound = pg.mixer.Sound("./sound/punch_ryu/punch.mp3") # on charge le son su joueur qui se prend le coup
+                    super_punch = pg.mixer.Sound("./sound/super_punch/grr_bah.mp3")
+                    parry_sound = pg.mixer.Sound("./sound/block_ryu/block.mp3")
                     if p2.isParry:
                         parry_sound.play() # on joue le son
                         pg.draw.rect(win, (255,255,255), (0,0,1080,720), 50)
@@ -158,8 +158,8 @@ class Player():
         win : las surface sur le quelle on affiche le rectangle
         """
         if not self.isPunch and not self.isMoving: # si on ne fait pas deja un coup de poing
-            kick_sound = pg.mixer.Sound("V3/sound/kick_ryu/kick.mp3")
-            parry_sound = pg.mixer.Sound("V3/sound/block_ryu/block.mp3")
+            kick_sound = pg.mixer.Sound("./sound/kick_ryu/kick.mp3")
+            parry_sound = pg.mixer.Sound("./sound/block_ryu/block.mp3")
             if self.isCrouch: # si on est accroupie
                 if self.orientation == "right":
                     self.kick_hb.x, self.kick_hb.y = self.hitbox.centerx, self.hitbox.centery + 20

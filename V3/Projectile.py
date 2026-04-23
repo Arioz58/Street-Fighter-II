@@ -25,8 +25,8 @@ class Projectile():
         pg.draw.rect(win, (255,0,0), self.projectile_hb, 5)
 
     def display_projectile(self, win, projectile_rect):
-        for file_name in os.listdir(f"V3/projectile_sprite_sheets/Hadoken"):
-            self.sprite.append(pg.image.load(f"V3/projectile_sprite_sheets/Hadoken/{file_name}"))
+        for file_name in os.listdir(f"./projectile_sprite_sheets/Hadoken"):
+            self.sprite.append(pg.image.load(f"./projectile_sprite_sheets/Hadoken/{file_name}"))
         
         self.spriteCount += 0.40
         if self.spriteCount >= len(self.sprite):

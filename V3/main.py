@@ -32,14 +32,14 @@ pg.mixer.init(44100, -16, 2, 2048)
 
 
 #menu song
-menu_song = pg.mixer.Sound("V3/intro.mp3")
+menu_song = pg.mixer.Sound("./intro.mp3")
 
 def menu():
     menu_song.play()
     while True:
         
         pg.display.flip()
-        SF_logo = pg.image.load("V3/menu/SF_logo.png")
+        SF_logo = pg.image.load("./menu/SF_logo.png")
         SF_logo = pg.transform.scale(SF_logo,(1080,720))
         f.blit(SF_logo,(-20,0))
         
@@ -58,11 +58,11 @@ def menu():
             play()
 
 #niveau
-stage = pg.image.load("V3/stage/ryu_stage.png")
+stage = pg.image.load("./stage/ryu_stage.png")
 stage = pg.transform.scale(stage, (1910,743))
 
 #stage song
-stage_song = pg.mixer.Sound("V3/stage/ryu_stage_song/song.mp3")
+stage_song = pg.mixer.Sound("./stage/ryu_stage_song/song.mp3")
 
 #initialisation des instance Player/joueurs
 player1 = Player(70,320,10,"right", 1)
